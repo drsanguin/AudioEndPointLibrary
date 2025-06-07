@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+    build:
+      name: CI
+      runs-on: windows-latest
+      steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Windows SDK 8.1 Installer
+        run: Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=323507" -OutFile "sdksetup.exe"
+
+      - name: Install Windows SDK 8.1
+        run: |
+          $ProgressPreference = 'SilentlyContinue'
+
+          $process = Start-Process -Wait sdksetup.exe `
+            -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit", "/log", "windows_sdk_installation.log" `
+            -PassThru
+
+          if ($process.ExitCode -ne 0) {
+              throw "Installation of Windows SDK 8.1 failed with exit code $($process.ExitCode)"
+          }
+
+      - name: Download Visual Studio 2017 Build Tools
+        run: Invoke-WebRequest -Uri https://aka.ms/vs/15/release/vs_buildtools.exe -OutFile vs_buildtools.exe
+
+      - name: Install Visual Studio 2017 Build Tools
+        run: |
+          $ProgressPreference = 'SilentlyContinue'
+
+          $process = Start-Process .\vs_buildtools.exe `
+            -ArgumentList '--quiet', '--wait', '--norestart', `
+              '--add', 'Microsoft.VisualStudio.Workload.VCTools' `
+            -NoNewWindow `
+            -Wait `
+            -RedirectStandardError vs_buildtools_error.log -RedirectStandardOutput vs_buildtools.log `
+            -PassThru
+
+          if ($process.ExitCode -ne 0) {
+            throw "Installation of Visual Studio 2017 Build Tools failed with exit code $($process.ExitCode)"
+          }
+
+      - name: Archive Environment Installation Logs
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: environment_installation_logs
+          path: |
+            windows_sdk_installation.log
+            vs_buildtools_error.log
+            vs_buildtools.log
+
+      - name: Setup MSBuild path
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Compile Solution
+        run: msbuild AudioEndPointLibrary.sln /p:Configuration=Release
