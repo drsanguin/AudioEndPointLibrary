@@ -10,6 +10,74 @@
 
 namespace AudioEndPoint {
 
+    AUDIOENDPOINTLIBRARY_API int get_all_audio_endpoints_count()
+    {
+        try
+        {
+            auto endpoint_collection = DefSound::CEndpointCollection(DefSound::EDeviceState::Active);
+            auto& endpoints = endpoint_collection.Get();
+
+            return static_cast<int>(endpoints.size());
+        }
+        catch (...)
+        {
+            return -1;
+        }
+    }
+
+    AUDIOENDPOINTLIBRARY_API int get_all_audio_endpoints(AudioEndpoint* out_audio_endpoints, int audio_endpoints_count)
+    {
+        try
+        {
+            auto endpoint_collection = DefSound::CEndpointCollection(DefSound::EDeviceState::Active);
+            auto& endpoints = endpoint_collection.Get();
+
+            for (auto i = 0; i < audio_endpoints_count; i++)
+            {
+                auto& endpoint = endpoints[i];
+
+                out_audio_endpoints[i].id = new wchar_t[wcslen(endpoint.m_DeviceId.data()) + 1];
+                wcscpy_s(out_audio_endpoints[i].id, wcslen(endpoint.m_DeviceId.data()) + 1, endpoint.m_DeviceId.data());
+
+                out_audio_endpoints[i].name = new wchar_t[wcslen(endpoint.m_FriendlyName.data()) + 1];
+                wcscpy_s(out_audio_endpoints[i].name, wcslen(endpoint.m_FriendlyName.data()) + 1, endpoint.m_FriendlyName.data());
+
+                out_audio_endpoints[i].is_default = endpoint.m_IsDefault[ERole::eConsole] || endpoint.m_IsDefault[ERole::eMultimedia] ? 1 : 0;
+            }
+
+            return 0;
+        }
+        catch (...)
+        {
+            return -1;
+        }
+    }
+
+    AUDIOENDPOINTLIBRARY_API int set_default_audio_endpoint(wchar_t* id) {
+        try
+        {
+            auto endpoint_collection = DefSound::CEndpointCollection(DefSound::EDeviceState::Active);
+            auto& endpoints = endpoint_collection.Get();
+
+            for each(auto endpoint in endpoints)
+            {
+                if (wcscmp(endpoint.m_DeviceId.data(), id) != 0)
+                {
+                    continue;
+                }
+
+                endpoint_collection.SetDefaultEndpoint(endpoint, ERole::eConsole);
+                endpoint_collection.SetDefaultEndpoint(endpoint, ERole::eMultimedia);
+            }
+
+            return 0;
+        }
+        catch (...)
+        {
+            return -1;
+        }
+    }
+
     struct CAudioEndPointLibrary::AudioEndPointLibraryImpl
     {
         IMMDeviceEnumeratorPtr m_DeviceEnumerator;

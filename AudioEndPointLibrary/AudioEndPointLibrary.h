@@ -5,6 +5,17 @@
 // This class is exported from the AudioEndPointLibrary.dll
 namespace AudioEndPoint {
 
+    extern "C" {
+        AUDIOENDPOINTLIBRARY_API typedef struct {
+            wchar_t* id;
+            wchar_t* name;
+            int is_default;
+        } AudioEndpoint;
+
+        AUDIOENDPOINTLIBRARY_API int get_all_audio_endpoints_count();
+        AUDIOENDPOINTLIBRARY_API int get_all_audio_endpoints(AudioEndpoint* out_audio_endpoints, int audio_endpoints_count);
+        AUDIOENDPOINTLIBRARY_API int set_default_audio_endpoint(wchar_t* id);
+    }
 
     class AUDIOENDPOINTLIBRARY_API CAudioEndPointLibrary {
     public:
