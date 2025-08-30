@@ -135,7 +135,7 @@ void EnumerateEndpoints(
         }
         catch (CError)
         {
-            DeviceDesc.Get().pwszVal = L"";
+            DeviceDesc.Get().pwszVal = _wcsdup(L"");
         }
 
 		CPropVariant FriendlyName;
@@ -149,7 +149,7 @@ void EnumerateEndpoints(
 	    }
 	    catch (CError)
 	    {
-			FriendlyName.Get().pwszVal = L"";
+			FriendlyName.Get().pwszVal = _wcsdup(L"");
 	    }	
 
         CPropVariant DeviceClassIconPath;
@@ -163,7 +163,7 @@ void EnumerateEndpoints(
         }
         catch (CError)
         {
-            DeviceClassIconPath.Get().pwszVal = L"%windir%\\system32\\mmres.dll,-3010";
+            DeviceClassIconPath.Get().pwszVal = _wcsdup(L"%windir%\\system32\\mmres.dll,-3010");
         }
         
 

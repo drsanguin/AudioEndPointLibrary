@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <functional>
 #include <list>
+#include <stdexcept>
 
 namespace AudioEndPoint
 {
@@ -19,7 +20,10 @@ namespace AudioEndPoint
 
         Signal()
         {
-            InitializeCriticalSectionAndSpinCount(&m_crit_section, 0x00000400);
+            if (!InitializeCriticalSectionAndSpinCount(&m_crit_section, 0x00000400))
+            {
+                throw std::runtime_error("Failed to initialize critical section");
+            }
         }
 
         ~Signal()

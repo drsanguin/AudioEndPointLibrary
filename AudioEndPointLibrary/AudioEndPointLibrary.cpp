@@ -59,7 +59,7 @@ namespace AudioEndPoint {
             auto endpoint_collection = DefSound::CEndpointCollection(DefSound::EDeviceState::Active);
             auto& endpoints = endpoint_collection.Get();
 
-            for each(auto endpoint in endpoints)
+            for (auto & endpoint : endpoints)
             {
                 if (wcscmp(endpoint.m_DeviceId.data(), id) != 0)
                 {
