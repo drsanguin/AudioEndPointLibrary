@@ -68,6 +68,8 @@ namespace AudioEndPoint {
 
                 endpoint_collection.SetDefaultEndpoint(endpoint, ERole::eConsole);
                 endpoint_collection.SetDefaultEndpoint(endpoint, ERole::eMultimedia);
+
+                return 0;
             }
 
             return 0;
